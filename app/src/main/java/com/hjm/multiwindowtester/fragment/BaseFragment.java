@@ -1,6 +1,7 @@
 package com.hjm.multiwindowtester.fragment;
 
 import android.content.res.Configuration;
+import android.graphics.Point;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.util.Log;
@@ -14,10 +15,25 @@ import com.hjm.multiwindowtester.R;
 
 abstract public class BaseFragment extends Fragment {
 
+    private TextView size = null;
+    private TextView realSize = null;
+
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         log("onCreate()");
+    }
+
+    private Point getWindowSize() {
+        Point out = new Point();
+        getActivity().getWindowManager().getDefaultDisplay().getSize(out);
+        return out;
+    }
+
+    private Point getRealWindowSize() {
+        Point out = new Point();
+        getActivity().getWindowManager().getDefaultDisplay().getRealSize(out);
+        return out;
     }
 
     @Override
@@ -28,6 +44,9 @@ abstract public class BaseFragment extends Fragment {
         View view = inflater.inflate(R.layout.fragment_base, container, false);
         TextView text = (TextView) view.findViewById(R.id.message);
         text.setText(getClassName());
+
+        size = (TextView) view.findViewById(R.id.size);
+        realSize = (TextView) view.findViewById(R.id.realSize);
 
         return view;
     }
@@ -47,6 +66,9 @@ abstract public class BaseFragment extends Fragment {
     @Override
     public void onResume() {
         super.onResume();
+
+        updateSizeInfo();
+
         log("onResume()");
     }
 
@@ -72,6 +94,21 @@ abstract public class BaseFragment extends Fragment {
     public void onDestroy() {
         super.onDestroy();
         log("onDestroy()");
+    }
+
+    @Override
+    public void onMultiWindowModeChanged(boolean isInMultiWindowMode) {
+        updateSizeInfo();
+    }
+
+    private void updateSizeInfo() {
+        if (size != null) {
+            size.setText("getSize(): " + getWindowSize());
+        }
+
+        if (realSize != null) {
+            realSize.setText("getRealSize(): " + getRealWindowSize());
+        }
     }
 
     abstract protected String getClassName();
